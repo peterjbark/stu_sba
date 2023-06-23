@@ -11,6 +11,8 @@ class Ship {
         if (chance < accuracy) {
             target.hull -= this.firepower;
             console.log("%cIt's a hit! Hit for " + `${this.firepower}` + " damage. Target has " + target.hull + " remaining hull reinforcements", 'font-size:20px; color:green')
+            alienStatData.innerText = currentAlien;
+            return target
             } else {
                  console.log("%cAttack missed, prepare for imminent damage", 'font-style:italic')
          }
@@ -20,6 +22,8 @@ class Ship {
         if (chance < accuracy) {
             target.hull -= this.firepower;
             console.log("%cWe've been hit for " + `${this.firepower}` + " damage. USS Assembly has " + target.hull + " remaining hull reinforcements", 'font-size:20px; color:red')
+            ussaStatData.innerText = currentHealth;
+
             } else {
                  console.log("%cEnemy attack missed.", 'font-style:italic')
          }
@@ -27,20 +31,20 @@ class Ship {
     }
 
 // Creating USS Assembly and Aliens
-const ussa = new Ship(20, 5, .7, "USS Assembly");
+const ussa = new Ship(20, 1, .7, "USS Assembly");
+let currentHealth = ussa.hull
 
-let alienArray = [];
-let alien = new Ship(3, 4, .6, "Alien");
-let alien2 = new Ship(6, 2, .8, "Alien2");
-let alien3 = new Ship(6, 4, .7, "Alien2");
-let alien4 = new Ship(5, 3, .8, "Alien2");
-let alien5 = new Ship(4, 2, .7, "Alien2");
 
-alienArray.push(alien.hull)
-alienArray.push(alien2.hull)
-alienArray.push(alien3.hull)
-alienArray.push(alien4.hull)
-alienArray.push(alien5.hull)
+let alien1 = new Ship("3", "4", .6, "Alien 1");
+let alien2 = new Ship("6", "2", .8, "Alien 2");
+let alien3 = new Ship('6', '4', .7, "Alien 3");
+let alien4 = new Ship('5', '3', .8, "Alien 4");
+let alien5 = new Ship('4', '2', .7, "Alien 5");
+let alien6 = new Ship('5', '3', .6, "Alien 6")
+
+let alienHulls = [alien1,alien2,alien3,alien4,alien5,alien6];
+let currentAlien = alienHulls[0].hull;
+console.log(currentAlien)
 
 // Obtaining class main div and id title div
 const main = document.querySelector(".main")
@@ -55,6 +59,8 @@ roundNum.innerText = 0;
 // Round start false prior to pressing start
 let roundStart = false;
 roundNum.style.display = "none";
+
+
 // Display for USS Assembly and Alien Stats
 const statDisplay = document.querySelector("#stats");
 const alienStatDisplay = document.createElement("div");
@@ -67,11 +73,11 @@ function gameRoundStats(){
     if (roundStart = true){
         alienStatDisplay.innerText = "Alien HP : ";
         statDisplay.appendChild(alienStatDisplay)
-        alienStatData.innerText = alienArray[0];
+        alienStatData.innerText = currentAlien;
         alienStatDisplay.appendChild(alienStatData)
         ussaStatDisplay.innerText = "USS Assembly HP : ";
         statDisplay.appendChild(ussaStatDisplay);
-        ussaStatData.innerText = ussa.hull;
+        ussaStatData.innerText = currentHealth;
         ussaStatDisplay.appendChild(ussaStatData);
     }
 }
@@ -81,12 +87,9 @@ const start = document.querySelector("#start")
 start.onclick = function(){
     roundStart = true;
     roundDisplay.innerText = "Alien"
-
     roundNum.innerText = 1;
-
     roundNum.style.display = "inline";
     start.style.display = "none";
-    next.style.display = "inline";
     attack.style.display = "inline";
     title.innerText = "🛸🛸Alien Invasion🛸🛸"
     gameRoundStats();
@@ -98,12 +101,14 @@ const reset = document.querySelector("#reset")
 reset.onclick = function(){  // Must revert alien hull to original value
     roundStart = false;
     roundNum.innerText = 0;
+    roundNum.style.display="none"
     start.style.display = "inline";
-    next.style.display = "none";
+    proceed.style.display = "none";
     attack.style.display = "none";
     statDisplay.removeChild(ussaStatDisplay);
     statDisplay.removeChild(alienStatDisplay);
     ussa.hull = 20;
+    roundDisplay.innerText = "Let's save the Universe!"
     title.innerText = "🍔 Save the Universe! 🍔"
     console.log("%cGame Reset", 'color: cyan')
 }
@@ -112,53 +117,59 @@ reset.onclick = function(){  // Must revert alien hull to original value
 const attack = document.createElement("button")
 attack.innerText = "Attack"
 attack.style.display = "none"
-attack.onclick = function(){
-    if (alien.hull > 0){
-    ussa.attack(0.7, alien)
+
+attack.addEventListener ('click', function(){
+    const ussaAttack = ussa.attack(0.7, alienHulls[0])
+    if (currentAlien > 0){
+        ussaAttack;
+        alienStatData.innerText = currentAlien;
         alienAttack()
-        if(alien.hull <= 0){
+        ussaStatData.innerText = ussa.hull;
+     } else (currentAlien  <= 0)
             console.log("%cDead Alien", 'color:red; font-size:15px')
             alienStatData.innerText = "Dead"
             title.innerText = "💥💥Alien Dead 💥💥"
             attack.style.display = "none"
             proceed.style.display = "inline"
-            next.style.display = "none";
-            return;
-        }
-    console.log(alien.hull + " Alien HP");
-    alienStatData.innerText = alienArray[0];
-}
-}
+                return;
+        })
 main.append(attack)
 
-//Enemy attack logic
+// Enemy attack logic
 function alienAttack(){
-    if (alien.hull > 0){
-        alien.enemyAttack(0.6, ussa)
-        ussaStatData.innerText = ussa.hull;
-
+    if (alienHulls[0].accuracy > 0){
+        alienHulls[0].enemyAttack(alienHulls[0].accuracy, ussa)
+        return currentHealth
+     } else{
+        console.log("Dead alien can't attack")
     }
 }
 
-// Skip Round logic
-const next = document.querySelector("#skip");
-next.style.display = "none"
-next.onclick = function (){   //Generate New Alien Ship with HP display
-roundNum.innerText ++
-console.log("Next round!")
+// Game Over 
+function gameOver(){
+    if (roundNum === 7){
+        console.log("yay")
+        // alienStatDisplay.style.display = "none";
+        // ussaStatDisplay.style.display = "none";
+        // roundDisplay.style.display = "none";
+
+        // const yay = document.createElement("div")
+        // yay.innerText = "Congratulations you beat the game and saved the universe!"
+        // main.appendChild(yay)
+    }
 }
 
 // Continue button to proceed to next round
 const proceed = document.querySelector("#proceed")
 proceed.onclick = function(){
-    roundNum.innerText ++
-    next.style.display = "inline";
+    alienHulls.shift();
+    roundNum.innerText ++;
+    alienStatData.innerText = alienHulls[0].hull;
     proceed.style.display = "none";
     attack.style.display = "inline";
     title.innerText = "🛸🛸Alien Invasion🛸🛸"
-        for (let i = 0; i < alienArray.length; i++){
-            alienStatData.innerText = alienArray[i]
-        }
+    gameOver();
     // Reset Alien HP or generate new Alien, function that iterates to next i in array upon click
 }
 proceed.style.display = "none";
+
