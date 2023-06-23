@@ -43,6 +43,7 @@ let alien6 = new Ship('5', '3', .6, "Alien 6")
 let alienHulls = [alien1,alien2,alien3,alien4,alien5,alien6];
 let currentAlien = alienHulls[0].hull;
 let removedAliens = [];
+let enemiesLeft = 6;
 
 // Obtaining class main div and id title div
 const main = document.querySelector(".main")
@@ -177,16 +178,24 @@ function gameOver(){
 // Continue button to proceed to next round
 const proceed = document.querySelector("#proceed")
 proceed.onclick = function(){
+    enemiesLeft --;
+    if (enemiesLeft == 0){
+        console.log("You win!")
+        proceed.style.display = "none"
+        roundDisplay.style.display ="none"
+        roundNum.style.display = "none"
+        title.innerText = "💥💥All Aliens are Dead! 💥💥"
+        alienStatDisplay.innerText = "You did it!😀😀"
+        ussaStatDisplay.innerText = "You saved the Universe! 😎👍💯"
+        return
+    }
     removedAliens = alienHulls.shift();
     roundNum.innerText ++;
     alienStatData.innerText = alienHulls[0].hull;
     proceed.style.display = "none";
     attack.style.display = "inline";
     title.innerText = "🛸🛸Alien Invasion🛸🛸"
-    if(alienHulls.length == 0){
-        console.log("u win")
-    }
-    }
+}
 
 proceed.style.display = "none";
 
