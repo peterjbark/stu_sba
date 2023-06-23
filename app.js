@@ -11,8 +11,6 @@ class Ship {
         if (chance < accuracy) {
             target.hull -= this.firepower;
             console.log("%cIt's a hit! Hit for " + `${this.firepower}` + " damage. Target has " + target.hull + " remaining hull reinforcements", 'font-size:20px; color:green')
-            alienStatData.innerText = currentAlien;
-            return target
             } else {
                  console.log("%cAttack missed, prepare for imminent damage", 'font-style:italic')
          }
@@ -31,7 +29,7 @@ class Ship {
     }
 
 // Creating USS Assembly and Aliens
-const ussa = new Ship(20, 1, .7, "USS Assembly");
+const ussa = new Ship(20, 5, .7, "USS Assembly");
 let currentHealth = ussa.hull
 
 
@@ -44,7 +42,7 @@ let alien6 = new Ship('5', '3', .6, "Alien 6")
 
 let alienHulls = [alien1,alien2,alien3,alien4,alien5,alien6];
 let currentAlien = alienHulls[0].hull;
-console.log(currentAlien)
+let removedAliens = [];
 
 // Obtaining class main div and id title div
 const main = document.querySelector(".main")
@@ -52,7 +50,7 @@ const title = document.querySelector("#title")
 
 // Trying to increment round number with text to clean up code
 const roundDisplay = document.querySelector("#roundDisplay")
-const roundNum = document.querySelector("#roundNumber")
+let roundNum = document.querySelector("#roundNumber")
 roundDisplay.innerText = "Let's save the Universe!"
 roundNum.innerText = 0;
 
@@ -89,6 +87,7 @@ start.onclick = function(){
     roundDisplay.innerText = "Alien"
     roundNum.innerText = 1;
     roundNum.style.display = "inline";
+    reset.style.display = "inline"
     start.style.display = "none";
     attack.style.display = "inline";
     title.innerText = "🛸🛸Alien Invasion🛸🛸"
@@ -98,9 +97,14 @@ start.onclick = function(){
 
 // Reset button logic
 const reset = document.querySelector("#reset")
+reset.style.display = "none"
+
 reset.onclick = function(){  // Must revert alien hull to original value
     roundStart = false;
+    alienHulls.unshift(removedAliens)
     roundNum.innerText = 0;
+    reset.style.display = "none"
+    roundDisplay.style.display = "inline"
     roundNum.style.display="none"
     start.style.display = "inline";
     proceed.style.display = "none";
@@ -119,27 +123,38 @@ attack.innerText = "Attack"
 attack.style.display = "none"
 
 attack.addEventListener ('click', function(){
+    if (ussa.hull <= 0){
+        console.log("Game Over")
+        attack.style.display = "none"
+        title.innerText = "💀💀Game Over💀💀"
+        return
+    }
     const ussaAttack = ussa.attack(0.7, alienHulls[0])
-    if (currentAlien > 0){
+    if (alienHulls[0].hull > 0){
         ussaAttack;
-        alienStatData.innerText = currentAlien;
-        alienAttack()
-        ussaStatData.innerText = ussa.hull;
-     } else (currentAlien  <= 0)
+        alienStatData.innerText = alienHulls[0].hull;
+        alienAttack();
+        ussaStatData.innerText = ussa.hull; }
+    else if (alienHulls[0].hull <= 0){
             console.log("%cDead Alien", 'color:red; font-size:15px')
+            alienStatData.innerText = alienHulls[0].hull
             alienStatData.innerText = "Dead"
             title.innerText = "💥💥Alien Dead 💥💥"
             attack.style.display = "none"
             proceed.style.display = "inline"
-                return;
-        })
+        }
+         else {
+            console.log("sum ting wong")
+        }
+
+})
+
 main.append(attack)
 
 // Enemy attack logic
 function alienAttack(){
-    if (alienHulls[0].accuracy > 0){
+    if (alienHulls[0].hull > 0){
         alienHulls[0].enemyAttack(alienHulls[0].accuracy, ussa)
-        return currentHealth
      } else{
         console.log("Dead alien can't attack")
     }
@@ -147,29 +162,31 @@ function alienAttack(){
 
 // Game Over 
 function gameOver(){
-    if (roundNum === 7){
-        console.log("yay")
-        // alienStatDisplay.style.display = "none";
-        // ussaStatDisplay.style.display = "none";
-        // roundDisplay.style.display = "none";
-
-        // const yay = document.createElement("div")
-        // yay.innerText = "Congratulations you beat the game and saved the universe!"
-        // main.appendChild(yay)
+    if(alienHulls.length == 0){
+    console.log("You win! c:")
+    roundDisplay.style.display ="none"
+    roundNum.style.display = "none"
+    proceed.style.display = "none"
+   
+    }else{
+        return
     }
-}
+    }
+
 
 // Continue button to proceed to next round
 const proceed = document.querySelector("#proceed")
 proceed.onclick = function(){
-    alienHulls.shift();
+    removedAliens = alienHulls.shift();
     roundNum.innerText ++;
     alienStatData.innerText = alienHulls[0].hull;
     proceed.style.display = "none";
     attack.style.display = "inline";
     title.innerText = "🛸🛸Alien Invasion🛸🛸"
-    gameOver();
-    // Reset Alien HP or generate new Alien, function that iterates to next i in array upon click
-}
+    if(alienHulls.length == 0){
+        console.log("u win")
+    }
+    }
+
 proceed.style.display = "none";
 
